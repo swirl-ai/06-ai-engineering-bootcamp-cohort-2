@@ -2,7 +2,6 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Prefetch, Document, FusionQuery, Filter, FieldCondition, MatchAny, MatchValue
 from langsmith import traceable, get_current_run_tree
 import openai
-
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import numpy as np
@@ -40,7 +39,7 @@ def retrieve_item_data(query, k=5):
 
     query_embedding = get_embedding(query)
 
-    qdrant_client = QdrantClient(url="http://qdrant:6333")
+    qdrant_client = QdrantClient(url="http://localhost:6333")
 
     results = qdrant_client.query_points(
         collection_name="Amazon-items-collection-01-hybrid-search",
@@ -124,7 +123,7 @@ def retrieve_reviews_data(query, item_list, k=5):
 
     query_embedding = get_embedding(query)
 
-    qdrant_client = QdrantClient(url="http://qdrant:6333")
+    qdrant_client = QdrantClient(url="http://localhost:6333")
 
     results = qdrant_client.query_points(
         collection_name="Amazon-items-collection-01-reviews",
@@ -201,6 +200,10 @@ def get_formatted_reviews_context(query: str, item_list: list, top_k: int = 5) -
 
 ### Adding Items to The Shopping Cart Tool
 
+@traceable(
+    name="add_to_shopping_cart",
+    run_type="tool"
+)
 def add_to_shopping_cart(items: list[dict], user_id: str, cart_id: str) -> str:
 
     """Add a list of provided items to the shopping cart.
@@ -215,8 +218,8 @@ def add_to_shopping_cart(items: list[dict], user_id: str, cart_id: str) -> str:
     """
 
     conn = psycopg2.connect(
-        host="postgres",
-        port=5432,
+        host="localhost",
+        port=5433,
         database="langgraph_db",
         user="langgraph_user",
         password="langgraph_password"
@@ -229,7 +232,7 @@ def add_to_shopping_cart(items: list[dict], user_id: str, cart_id: str) -> str:
             product_id = item['product_id']
             quantity = item['quantity']
 
-            qdrant_client = QdrantClient(url="http://qdrant:6333")
+            qdrant_client = QdrantClient(url="http://localhost:6333")
 
             dummy_vector = np.zeros(1536).tolist()
             payload = qdrant_client.query_points(
@@ -300,6 +303,10 @@ def add_to_shopping_cart(items: list[dict], user_id: str, cart_id: str) -> str:
 
 ### Retrieving The Shopping Cart Tool
 
+@traceable(
+    name="get_shopping_cart",
+    run_type="tool"
+)
 def get_shopping_cart(user_id: str, cart_id: str) -> list[dict]:
 
     """
@@ -314,8 +321,8 @@ def get_shopping_cart(user_id: str, cart_id: str) -> list[dict]:
     """
     
     conn = psycopg2.connect(
-        host="postgres",
-        port=5432,
+        host="localhost",
+        port=5433,
         database="langgraph_db",
         user="langgraph_user",
         password="langgraph_password"
@@ -340,6 +347,10 @@ def get_shopping_cart(user_id: str, cart_id: str) -> list[dict]:
 
 ### Removing Items from The Shopping Cart Tool
 
+@traceable(
+    name="remove_from_cart",
+    run_type="tool"
+)
 def remove_from_cart(product_id: str, user_id: str, cart_id: str) -> str:
 
     """
@@ -355,8 +366,8 @@ def remove_from_cart(product_id: str, user_id: str, cart_id: str) -> str:
     """
     
     conn = psycopg2.connect(
-        host="postgres",
-        port=5432,
+        host="localhost",
+        port=5433,
         database="langgraph_db",
         user="langgraph_user",
         password="langgraph_password"
@@ -392,8 +403,8 @@ def check_warehouse_availability(items: list[dict]) -> dict:
     """
     
     conn = psycopg2.connect(
-        host="postgres",
-        port=5432,
+        host="localhost",
+        port=5433,
         database="langgraph_db",
         user="langgraph_user",
         password="langgraph_password"
@@ -532,8 +543,8 @@ def reserve_warehouse_items(reservations: list[dict]) -> dict:
     """
     
     conn = psycopg2.connect(
-        host="postgres",
-        port=5432,
+        host="localhost",
+        port=5433,
         database="langgraph_db",
         user="langgraph_user",
         password="langgraph_password"
