@@ -5,7 +5,7 @@ from api.agent.graph import State
 from time import sleep
 
 
-ACC_THRESHOLD = 0.7
+ACC_THRESHOLD = 0.6
 SLEEP_TIME = 5
 
 client = Client()
