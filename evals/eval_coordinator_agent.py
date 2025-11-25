@@ -5,7 +5,7 @@ from api.agent.graph import State
 from time import sleep
 
 
-ACC_THRESHOLD = 0.6
+ACC_THRESHOLD = 0.9
 SLEEP_TIME = 5
 
 client = Client()
@@ -26,6 +26,7 @@ results = client.evaluate(
     evaluators=[
         next_agent_evaluator
     ],
+    max_concurrency=5,
     experiment_prefix="coordinator-eval-dataset"
 )
 
